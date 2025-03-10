@@ -1,0 +1,35 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
+
+    <PropertyGroup>
+        <TargetFrameworks>net8.0</TargetFrameworks>
+        <LangVersion>latest</LangVersion>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+        <WarningsNotAsErrors>BL0007</WarningsNotAsErrors>
+
+        <Authors>Andersen27</Authors>
+        <Version>1.3.0</Version>
+        <PackageId>Photino.Blazor.CustomWindow</PackageId>
+        <Title>Photino.Blazor.CustomWindow</Title>
+        <Description>Customizable window view and behaviour implementation for Photino.Blazor applications with Chromeless mode</Description>
+        <PackageDescription>Customizable window view and behaviour implementation for Photino.Blazor applications with Chromeless mode</PackageDescription>
+        <PackageTags>photino;blazor;custom;window;customwindow;customizable;chromeless;header</PackageTags>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+        <PackageProjectUrl>https://github.com/Andersen27/Photino.Blazor.CustomWindow</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/Andersen27/Photino.Blazor.CustomWindow</RepositoryUrl>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+        <PackageIcon>customwindow.png</PackageIcon>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <None Include="..\README.md" Pack="true" PackagePath="\" />
+        <None Include="..\customwindow.png" Pack="true" PackagePath="\" />
+    </ItemGroup>
+
+
+    <ItemGroup>
+      <ProjectReference Include="..\Photino.Blazor\Photino.Blazor.csproj" />
+    </ItemGroup>
+
+</Project>

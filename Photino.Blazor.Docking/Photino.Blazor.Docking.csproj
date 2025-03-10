@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
 
     <PropertyGroup>
-        <TargetFrameworks>net7.0;net8.0</TargetFrameworks>
+        <TargetFrameworks>net8.0</TargetFrameworks>
         <LangVersion>latest</LangVersion>
         <ImplicitUsings>enable</ImplicitUsings>
         <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
@@ -28,10 +28,13 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="Photino.Blazor" Version="3.1.10" />
-        <PackageReference Include="Photino.Blazor.CustomWindow" Version="1.3.1" />
         <PackageReference Include="Radzen.Blazor" Version="5.2.4" />
         <!--<PackageReference Include="Microsoft.AspNetCore.Components.WebView" Version="7.0.0" />-->
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Photino.Blazor.CustomWindow\Photino.Blazor.CustomWindow.csproj" />
+      <ProjectReference Include="..\Photino.Blazor\Photino.Blazor.csproj" />
     </ItemGroup>
 
 </Project>
