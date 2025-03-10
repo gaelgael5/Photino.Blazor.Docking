@@ -33,6 +33,7 @@ public class ScreensAgentService(PhotinoBlazorApp photinoBlazorApp)
     public double GetPointerScreenScale(MouseEventArgs e)
     {
         var pointerScreenPos = new Point((int)e.ScreenX, (int)e.ScreenY);
+        InitializeIfNeed();
         var monitor = _monitorsWebScreens.First(s => s.Value.Contains(pointerScreenPos)).Key;
         return monitor.Scale;
     }
@@ -62,82 +63,87 @@ public class ScreensAgentService(PhotinoBlazorApp photinoBlazorApp)
         var isHorisontalDirection =
             monitors.Any(m1 => monitors.Except([m1]).Any(m2 => m2.MonitorArea.Left >= m1.MonitorArea.Width)) ||
             monitors.Any(m1 => m1.MonitorArea.Left <= -m1.MonitorArea.Width);
+
         var isVerticalDirection =
             monitors.Any(m1 => monitors.Except([m1]).Any(m2 => m2.MonitorArea.Top >= m1.MonitorArea.Height)) ||
             monitors.Any(m1 => m1.MonitorArea.Top <= -m1.MonitorArea.Height);
 
         if (!(isHorisontalDirection ^ isVerticalDirection))
-        {
-            throw new Exception("Only one-direction monitors positioning supported for different scale factors");
-        }
-        else
-        {
-            // add primary monitor to dictionary
-            var primaryWebScreen = ScaleRect(primaryMonitor.MonitorArea, 1 / primaryMonitor.Scale);
-            _monitorsWebScreens = new() { {primaryMonitor, primaryWebScreen} };
-            Rectangle lastWebScreen;
+            isVerticalDirection = false;
 
-            // horizontal direction calculation
-            if (isHorisontalDirection)
+        //if (!(isHorisontalDirection ^ isVerticalDirection))
+        //{
+        //    throw new Exception("Only one-direction monitors positioning supported for different scale factors");
+        //}
+        //else
+        //{
+        // add primary monitor to dictionary
+        var primaryWebScreen = ScaleRect(primaryMonitor.MonitorArea, 1 / primaryMonitor.Scale);
+        _monitorsWebScreens = new() { { primaryMonitor, primaryWebScreen } };
+        Rectangle lastWebScreen;
+
+        // horizontal direction calculation
+        if (isHorisontalDirection)
+        {
+            var monitorsOrderedByX = monitors.OrderBy(m => m.MonitorArea.X).ToArray();
+            var primaryMonitorIndex = Array.IndexOf(monitorsOrderedByX, primaryMonitor);
+
+            lastWebScreen = primaryWebScreen;
+            for (int i = primaryMonitorIndex + 1; i < monitorsOrderedByX.Length; i++)
             {
-                var monitorsOrderedByX = monitors.OrderBy(m => m.MonitorArea.X).ToArray();
-                var primaryMonitorIndex = Array.IndexOf(monitorsOrderedByX, primaryMonitor);
-
-                lastWebScreen = primaryWebScreen;
-                for (int i = primaryMonitorIndex + 1; i < monitorsOrderedByX.Length; i++)
-                {
-                    var monitor = monitorsOrderedByX[i];
-                    var webScreen = ScaleRect(monitor.MonitorArea, 1 / monitor.Scale);
-                    webScreen.X = lastWebScreen.Right;
-                    webScreen.Y = (int)(monitor.MonitorArea.Y / primaryMonitor.Scale) +
-                        (monitor.MonitorArea.Y > 0 ? 0 : primaryWebScreen.Bottom - webScreen.Height);
-                    _monitorsWebScreens[monitor] = webScreen;
-                    lastWebScreen = webScreen;
-                }
-
-                lastWebScreen = primaryWebScreen;
-                for (int i = primaryMonitorIndex - 1; i >= 0; i--)
-                {
-                    var monitor = monitorsOrderedByX[i];
-                    var webScreen = ScaleRect(monitor.MonitorArea, 1 / monitor.Scale);
-                    webScreen.X = lastWebScreen.Left - webScreen.Width;
-                    webScreen.Y = (int)(monitor.MonitorArea.Y / primaryMonitor.Scale) +
-                        (monitor.MonitorArea.Y > 0 ? 0 : primaryWebScreen.Bottom - webScreen.Height);
-                    _monitorsWebScreens[monitor] = webScreen;
-                    lastWebScreen = webScreen;
-                }
+                var monitor = monitorsOrderedByX[i];
+                var webScreen = ScaleRect(monitor.MonitorArea, 1 / monitor.Scale);
+                webScreen.X = lastWebScreen.Right;
+                webScreen.Y = (int)(monitor.MonitorArea.Y / primaryMonitor.Scale) +
+                    (monitor.MonitorArea.Y > 0 ? 0 : primaryWebScreen.Bottom - webScreen.Height);
+                _monitorsWebScreens[monitor] = webScreen;
+                lastWebScreen = webScreen;
             }
 
-            // vertical direction calculation
-            if (isVerticalDirection)
+            lastWebScreen = primaryWebScreen;
+            for (int i = primaryMonitorIndex - 1; i >= 0; i--)
             {
-                var monitorsOrderedByY = monitors.OrderBy(m => m.MonitorArea.Y).ToArray();
-                var primaryMonitorIndex = Array.IndexOf(monitorsOrderedByY, primaryMonitor);
-
-                lastWebScreen = primaryWebScreen;
-                for (int i = primaryMonitorIndex + 1; i < monitorsOrderedByY.Length; i++)
-                {
-                    var monitor = monitorsOrderedByY[i];
-                    var webScreen = ScaleRect(monitor.MonitorArea, 1 / monitor.Scale);
-                    webScreen.Y = lastWebScreen.Bottom;
-                    webScreen.X = (int)(monitor.MonitorArea.X / primaryMonitor.Scale) +
-                        (monitor.MonitorArea.X > 0 ? 0 : primaryWebScreen.Right - webScreen.Width);
-                    _monitorsWebScreens[monitor] = webScreen;
-                    lastWebScreen = webScreen;
-                }
-
-                lastWebScreen = primaryWebScreen;
-                for (int i = primaryMonitorIndex - 1; i >= 0; i--)
-                {
-                    var monitor = monitorsOrderedByY[i];
-                    var webScreen = ScaleRect(monitor.MonitorArea, 1 / monitor.Scale);
-                    webScreen.Y = lastWebScreen.Top - webScreen.Height;
-                    webScreen.X = (int)(monitor.MonitorArea.X / primaryMonitor.Scale) +
-                        (monitor.MonitorArea.X > 0 ? 0 : primaryWebScreen.Right - webScreen.Width);
-                    _monitorsWebScreens[monitor] = webScreen;
-                    lastWebScreen = webScreen;
-                }
+                var monitor = monitorsOrderedByX[i];
+                var webScreen = ScaleRect(monitor.MonitorArea, 1 / monitor.Scale);
+                webScreen.X = lastWebScreen.Left - webScreen.Width;
+                webScreen.Y = (int)(monitor.MonitorArea.Y / primaryMonitor.Scale) +
+                    (monitor.MonitorArea.Y > 0 ? 0 : primaryWebScreen.Bottom - webScreen.Height);
+                _monitorsWebScreens[monitor] = webScreen;
+                lastWebScreen = webScreen;
             }
         }
+
+        // vertical direction calculation
+        if (isVerticalDirection)
+        {
+            var monitorsOrderedByY = monitors.OrderBy(m => m.MonitorArea.Y).ToArray();
+            var primaryMonitorIndex = Array.IndexOf(monitorsOrderedByY, primaryMonitor);
+
+            lastWebScreen = primaryWebScreen;
+            for (int i = primaryMonitorIndex + 1; i < monitorsOrderedByY.Length; i++)
+            {
+                var monitor = monitorsOrderedByY[i];
+                var webScreen = ScaleRect(monitor.MonitorArea, 1 / monitor.Scale);
+                webScreen.Y = lastWebScreen.Bottom;
+                webScreen.X = (int)(monitor.MonitorArea.X / primaryMonitor.Scale) +
+                    (monitor.MonitorArea.X > 0 ? 0 : primaryWebScreen.Right - webScreen.Width);
+                _monitorsWebScreens[monitor] = webScreen;
+                lastWebScreen = webScreen;
+            }
+
+            lastWebScreen = primaryWebScreen;
+            for (int i = primaryMonitorIndex - 1; i >= 0; i--)
+            {
+                var monitor = monitorsOrderedByY[i];
+                var webScreen = ScaleRect(monitor.MonitorArea, 1 / monitor.Scale);
+                webScreen.Y = lastWebScreen.Top - webScreen.Height;
+                webScreen.X = (int)(monitor.MonitorArea.X / primaryMonitor.Scale) +
+                    (monitor.MonitorArea.X > 0 ? 0 : primaryWebScreen.Right - webScreen.Width);
+                _monitorsWebScreens[monitor] = webScreen;
+                lastWebScreen = webScreen;
+            }
+        }
+        //}
     }
+
 }
