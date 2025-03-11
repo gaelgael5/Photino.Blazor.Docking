@@ -8,6 +8,9 @@
 
 
     <ItemGroup>
+        <PackageReference Include="Black.Beard.ComponentModel" Version="1.0.169" />
+        <PackageReference Include="Black.Beard.ComponentModel.Attributes" Version="1.0.169" />
+        <PackageReference Include="Black.Beard.Globalization" Version="1.0.169" />
         <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="8.0.0" />
         <PackageReference Include="Radzen.Blazor" Version="5.2.4" />
     </ItemGroup>

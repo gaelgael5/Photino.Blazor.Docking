@@ -6,11 +6,12 @@ namespace Photino.Blazor.CustomWindow.Services;
 
 public class ScreensAgentService(PhotinoBlazorApp photinoBlazorApp)
 {
+
     private PhotinoBlazorApp PhotinoBlazorApp { get; set; } = photinoBlazorApp;
 
     private Dictionary<Monitor, Rectangle> _monitorsWebScreens;
 
-    public bool Inited => _monitorsWebScreens != null;
+    public bool Initialized => _monitorsWebScreens != null;
 
     private static Rectangle ScaleRect(Rectangle rect, double scale)
     {
@@ -40,7 +41,7 @@ public class ScreensAgentService(PhotinoBlazorApp photinoBlazorApp)
 
     public void InitializeIfNeed()
     {
-        if (!Inited)
+        if (!Initialized)
             UpdateScreensInfo();
     }
 

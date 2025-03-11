@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Components;
+﻿using Bb.ComponentModel.Loaders;
+using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.Extensions.DependencyInjection;
 using Photino.Blazor.CustomWindow.Services;
@@ -17,14 +18,15 @@ namespace Photino.Blazor.Docking.Services;
 /// </summary>
 public sealed class DockingService
 {
+
     private static readonly JsonSerializerOptions _serializerOptions = new()
     {
         WriteIndented = true,
     };
 
     private ScreensAgentService _screensAgentService;
-    private Action<IServiceCollection> _servicesInitializer;
-    private DockPanelConfig[] _panelsConfig = null;
+    private readonly InjectionLoader<IServiceCollection> _initializer2;
+    private DockPanelConfigs _panelsConfig = null;
     private Size _defaultFloatPanelSize = new Size(400, 600);
     private Point _defaultFloatPanelLocationOffset = new Point(50, 50);
     private DockingLayout _dockingLayout = new();
@@ -63,45 +65,40 @@ public sealed class DockingService
     public event Action LayoutLoaded;
     public event Action<string> DockPanelClosed;
 
-    internal DockingService(ScreensAgentService screensAgentService,
-                            Action<IServiceCollection> servicesInitializer,
-                            DockPanelConfig[] panelsConfig,
-                            Type floatPanelWrapperComponent = null,
-                            string multiplePanelsTitle = "",
-                            bool restoreHostWindowOnOpen = true,
-                            Size? panelsMinSize = null,
-                            Size? defaultFloatPanelSize = null)
-    {
-        foreach (var panelConfig in panelsConfig)
-            if (panelsConfig.Count(p => p.Id == panelConfig.Id || p.ComponentType == panelConfig.ComponentType) > 1)
-                throw new Exception("Invalid docking service configuration: " +
-                    "there are duplicates of identificators or panel types in the dock panels configuration set.");
+    public const string Context = "DockingService";
 
-        if (!floatPanelWrapperComponent?.IsSubclassOf(typeof(ComponentBase)) ?? false)
+    internal DockingService(ScreensAgentService screensAgentService)
+    {
+
+        var initializer = new DockingServiceInitializer();
+        _initializer2 = LoaderInjectionExtensions.PrepareAutoConfiguration<IServiceCollection>(null, DockingService.Context);
+        _panelsConfig = new DockPanelConfigs();
+
+        if (!initializer.floatPanelWrapperComponent?.IsSubclassOf(typeof(ComponentBase)) ?? false)
             throw new Exception("Invalid docking service configuration: " +
                 "floatPanelWrapperComponent type must be subclass of ComponentBase.");
 
         _screensAgentService = screensAgentService;
-        _servicesInitializer = servicesInitializer;
-        _panelsConfig = panelsConfig;
-        FloatPanelWrapperComponent = floatPanelWrapperComponent;
-        MultiplePanelsTitle = multiplePanelsTitle;
-        RestoreHostWindow = restoreHostWindowOnOpen;
+        FloatPanelWrapperComponent = initializer.floatPanelWrapperComponent;
+        MultiplePanelsTitle = initializer.multiplePanelsTitle;
+        RestoreHostWindow = initializer.restoreHostWindowOnOpen;
 
-        if (panelsMinSize.HasValue)
-            DockPanelScheme.MinSize = panelsMinSize.Value;
-        if (defaultFloatPanelSize.HasValue)
-            _defaultFloatPanelSize = defaultFloatPanelSize.Value;
+        if (initializer.panelsMinSize.HasValue)
+            DockPanelScheme.MinSize = initializer.panelsMinSize.Value;
+
+        if (initializer.defaultFloatPanelSize.HasValue)
+            _defaultFloatPanelSize = initializer.defaultFloatPanelSize.Value;
+
     }
 
     private void CreateFloatPanel(DockPanelFloatScheme floatPanel)
     {
-        FloatPanelsCreateQueue.Enqueue(floatPanel);
 
+        FloatPanelsCreateQueue.Enqueue(floatPanel);
         var appBuilder = PhotinoBlazorAppBuilder.CreateDefault();
         appBuilder.Services.AddSingleton(this);
         appBuilder.Services.AddSingleton(_screensAgentService);
-        _servicesInitializer(appBuilder.Services);
+        _initializer2.Execute(appBuilder.Services);
         appBuilder.RootComponents.Add<DockPanelFloat>("app");
         var app = appBuilder.Build();
 
@@ -150,7 +147,7 @@ public sealed class DockingService
         {
             targetPanel.IsDetachedGhost = false;
         }
-        else if(attachingZone == DockZone.Center)
+        else if (attachingZone == DockZone.Center)
         {
             var attachingDockPanel = (DockPanelScheme)attachingPanel;
             if (targetPanel.ParentContainer is DockPanelTabsScheme tabsPanel)
@@ -176,7 +173,8 @@ public sealed class DockingService
         else
         {
             var targetPanelParent = actualTargetPanel.ParentContainer;
-            var newSplitPanel = new DockPanelSplitScheme() {
+            var newSplitPanel = new DockPanelSplitScheme()
+            {
                 FirstPanel = attachingZone is DockZone.Left or DockZone.Top ? attachingPanel : actualTargetPanel,
                 SecondPanel = attachingZone is DockZone.Right or DockZone.Bottom ? attachingPanel : actualTargetPanel,
                 Orientation = attachingZone is DockZone.Left or DockZone.Right ? SplitOrientation.Horizontal : SplitOrientation.Vertical,
@@ -218,7 +216,7 @@ public sealed class DockingService
         DockZone newZone = default;
 
         var pointerPos = _screensAgentService.GetOSPointerPosition(e);
-        foreach(var areaInfo in _orderedDockPanelsAreaInfo)
+        foreach (var areaInfo in _orderedDockPanelsAreaInfo)
         {
             if (!areaInfo.Area.Contains(pointerPos))
                 continue;
@@ -296,13 +294,13 @@ public sealed class DockingService
         }
     }
 
-    internal DockPanelConfig GetPanelConfig(Type componentType) => _panelsConfig.Single(p => p.ComponentType == componentType);
+    internal DockPanelConfig GetPanelConfig(Type componentType) => _panelsConfig.Get(componentType);
 
     /// <summary>
     /// Gets dock panel configuration.
     /// </summary>
-    /// <param name="id">Target dock panel identificator</param>
-    public DockPanelConfig GetPanelConfig(string id) => _panelsConfig.Single(p => p.Id == id);
+    /// <param name="id">Target dock panel identifier</param>
+    public DockPanelConfig GetPanelConfig(string id) => _panelsConfig.Get(id);
 
     /// <summary>
     /// Gets all exists dock panel configurations.
@@ -312,7 +310,7 @@ public sealed class DockingService
     /// <summary>
     /// Show dock panel in its last known location or in a floating window if panel is not defined in the layout.
     /// </summary>
-    /// <param name="id">Target dock panel identificator</param>
+    /// <param name="id">Target dock panel identifier</param>
     public void ShowPanel(string id)
     {
         if (_dockingLayout.FindDockPanel(id, out var hostPanel) is DockPanelScheme panel)
@@ -402,7 +400,7 @@ public sealed class DockingService
         {
             newLayout = JsonSerializer.Deserialize<DockingLayout>(layoutJson);
         }
-        catch(JsonException)
+        catch (JsonException)
         {
             return false;
         }

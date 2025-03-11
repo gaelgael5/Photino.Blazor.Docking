@@ -40,6 +40,12 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <PackageReference Include="Black.Beard.ComponentModel" Version="1.0.169" />
+	  <PackageReference Include="Black.Beard.ComponentModel.Attributes" Version="1.0.169" />
+	  <PackageReference Include="Black.Beard.Globalization" Version="1.0.169" />
+	</ItemGroup>
+
+	<ItemGroup>
 	  <ProjectReference Include="..\Photino.NET\Photino.NET.csproj" />
 	</ItemGroup>
 
