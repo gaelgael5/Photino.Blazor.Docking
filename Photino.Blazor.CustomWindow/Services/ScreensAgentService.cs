@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Components.Web;
 using System.Drawing;
+using System.Runtime.CompilerServices;
 using Monitor = Photino.NET.Monitor;
 
 namespace Photino.Blazor.CustomWindow.Services;
@@ -10,7 +11,7 @@ public class ScreensAgentService(PhotinoBlazorApp photinoBlazorApp)
 
     private Dictionary<Monitor, Rectangle> _monitorsWebScreens;
 
-    public bool Inited => _monitorsWebScreens != null;
+    public bool Initialized => _monitorsWebScreens != null;
 
     private static Rectangle ScaleRect(Rectangle rect, double scale)
     {
@@ -19,8 +20,9 @@ public class ScreensAgentService(PhotinoBlazorApp photinoBlazorApp)
 
     public Point GetOSPointerPosition(MouseEventArgs e)
     {
+        InitializeIfNeed();
         var pointerScreenPos = new Point((int)e.ScreenX, (int)e.ScreenY);
-        var monitorScreenPair = _monitorsWebScreens.First(s => s.Value.Contains(pointerScreenPos));
+        var monitorScreenPair = _monitorsWebScreens.FirstOrDefault(s => s.Value.Contains(pointerScreenPos));
         var monitor = monitorScreenPair.Key;
         var webScreen = monitorScreenPair.Value;
         return new()
@@ -32,17 +34,20 @@ public class ScreensAgentService(PhotinoBlazorApp photinoBlazorApp)
 
     public double GetPointerScreenScale(MouseEventArgs e)
     {
+        InitializeIfNeed();
         var pointerScreenPos = new Point((int)e.ScreenX, (int)e.ScreenY);
-        var monitor = _monitorsWebScreens.First(s => s.Value.Contains(pointerScreenPos)).Key;
+        var monitor = _monitorsWebScreens.FirstOrDefault(s => s.Value.Contains(pointerScreenPos)).Key;
         return monitor.Scale;
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void InitializeIfNeed()
     {
-        if (!Inited)
+        if (!Initialized)
             UpdateScreensInfo();
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void UpdateScreensInfo()
     {
         // init monitors and primary monitor
