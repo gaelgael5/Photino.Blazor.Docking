@@ -28,6 +28,8 @@
     </ItemGroup>
 
     <ItemGroup>
+        <PackageReference Include="Black.Beard.ComponentModel" Version="1.0.172" />
+        <PackageReference Include="Black.Beard.ComponentModel.Attributes" Version="1.0.172" />
         <PackageReference Include="Radzen.Blazor" Version="5.2.4" />
         <!--<PackageReference Include="Microsoft.AspNetCore.Components.WebView" Version="7.0.0" />-->
     </ItemGroup>

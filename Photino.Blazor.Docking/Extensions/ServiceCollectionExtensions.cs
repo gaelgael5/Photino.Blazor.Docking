@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.DependencyInjection;
-using Photino.Blazor.CustomWindow.Extensions;
 using Photino.Blazor.CustomWindow.Services;
 using Photino.Blazor.Docking.Services;
 using System.Drawing;
@@ -37,31 +36,17 @@ public static class ServiceCollectionExtensions
     /// <param name="defaultFloatPanelSize">
     /// Default floating window size in screen pixels. For <c>null</c> is <see cref="Size"/>(400, 600).
     /// </param>
-    public static IServiceCollection AddPhotinoBlazorDocking(this IServiceCollection services,
-                                                             Action<IServiceCollection> servicesInitializer,
-                                                             DockPanelConfig[] panelsConfig,
-                                                             Type floatPanelWrapperComponent = null,
-                                                             string multiplePanelsTitle = "",
-                                                             bool restoreHostWindowOnOpen = true,
-                                                             Size? panelsMinSize = null,
-                                                             Size? defaultFloatPanelSize = null)
+    public static IServiceCollection AddPhotinoBlazorDocking(this IServiceCollection services)
     {
-        services.AddCustomWindow();
-        
+
+        services.AddSingleton<ScreensAgentService>();
+
         services.AddSingleton(sp =>
         {
             var screensAgentService = sp.GetRequiredService<ScreensAgentService>();
-            return new DockingService(
-                screensAgentService,
-                servicesInitializer,
-                panelsConfig,
-                floatPanelWrapperComponent,
-                multiplePanelsTitle,
-                restoreHostWindowOnOpen,
-                panelsMinSize,
-                defaultFloatPanelSize
-            );
+            return new DockingService(screensAgentService);
         });
         return services;
+
     }
 }

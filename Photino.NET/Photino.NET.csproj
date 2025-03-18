@@ -33,6 +33,7 @@
 	</Target>
 
   <ItemGroup>
+    <PackageReference Include="Black.Beard.ComponentModel.Attributes" Version="1.0.172" />
     <PackageReference Include="Photino.Native" Version="4.0.22" />
   </ItemGroup>
 

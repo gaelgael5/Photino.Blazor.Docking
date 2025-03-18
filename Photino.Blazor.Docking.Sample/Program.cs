@@ -1,4 +1,6 @@
 ﻿using System;
+using Bb.ComponentModel;
+using Bb.ComponentModel.Loaders;
 using Microsoft.Extensions.DependencyInjection;
 using Photino.Blazor.Docking.Extensions;
 using Photino.Blazor.Docking.Sample.Pages;
@@ -23,27 +25,23 @@ class Program
     [STAThread]
     static void Main(string[] args)
     {
+
+        IocHelper.LoadAssemblies(true);
+
         var appBuilder = PhotinoBlazorAppBuilder.CreateDefault(args);
+    	appBuilder.Services.AutoConfigure(null, ConstantsCore.Service);
 
-        InitializeServices(appBuilder.Services);
+        // InitializeServices(appBuilder.Services);
 
-        appBuilder.Services.AddPhotinoBlazorDocking(
-            InitializeServices,
-            [
-                new DockPanelConfig(typeof(Index), "index", "Index page"),
-                new DockPanelConfig(typeof(Counter), "counter", "Counter Page"),
-                new DockPanelConfig(typeof(FetchData), "fetchData", "Fetch data page"),
-                new DockPanelConfig(typeof(TestPage1), "testPage1", "Test page #1"),
-                new DockPanelConfig(typeof(TestPage2), "testPage2", "Test page #2"),
-                new DockPanelConfig(typeof(TestFloatPanel), "testFloatPanel", "Test float panel"),
-            ]
-            //, typeof(DemoWrapper)
-        );
+        appBuilder.Services.AddPhotinoBlazorDocking();
 
         // register root component and selector
         appBuilder.RootComponents.Add<App>("app");
-
+                        
         var app = appBuilder.Build();
+
+        //var r = app.Services.GetService(typeof(Photino.Blazor.Docking.Services.DockingService));
+
 
         // customize window
         app.MainWindow
@@ -59,3 +57,4 @@ class Program
         app.Run();
     }
 }
+

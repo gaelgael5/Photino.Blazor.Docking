@@ -9,8 +9,10 @@ using Photino.NET;
 
 namespace Photino.Blazor
 {
+
     public static class ServiceCollectionExtensions
     {
+
         public static IServiceCollection AddBlazorDesktop(this IServiceCollection services, IFileProvider fileProvider = null)
         {
             services
