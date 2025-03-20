@@ -15,6 +15,8 @@
 		<Title>Photino.blazor</Title>
 		<PackageIcon>photino.png</PackageIcon>
 		<OutputType>Library</OutputType>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <ImplicitUsings>true</ImplicitUsings>
 	</PropertyGroup>
 
 	<Target Name="SetPackageVersion" DependsOnTargets="Build">
@@ -41,10 +43,7 @@
 
 	<ItemGroup>
 	  <PackageReference Include="Black.Beard.ComponentModel.Attributes" Version="1.0.172" />
-	</ItemGroup>
-
-	<ItemGroup>
-	  <ProjectReference Include="..\Photino.NET\Photino.NET.csproj" />
+	  <PackageReference Include="Photino.Native" Version="4.0.22" />
 	</ItemGroup>
 
 </Project>

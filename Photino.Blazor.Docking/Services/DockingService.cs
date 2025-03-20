@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Photino.Blazor.CustomWindow.Services;
 using Photino.Blazor.Docking.Components.Internal;
 using Photino.Blazor.Docking.LayoutScheme;
+using Photino.Blazor;
 using System.Drawing;
 using System.Text.Json;
 

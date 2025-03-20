@@ -24,13 +24,13 @@ namespace Photino.Blazor
 
     internal class PhotinoSynchronizationContext : SynchronizationContext
     {
-        private static readonly ContextCallback ExecutionContextThunk = (object state) =>
+        private static readonly ContextCallback ExecutionContextThunk = (state) =>
         {
             var item = (WorkItem)state;
             item.SynchronizationContext.ExecuteSynchronously(null, item.Callback, item.State);
         };
 
-        private static readonly Action<Task, object> BackgroundWorkThunk = (Task task, object state) =>
+        private static readonly Action<Task, object> BackgroundWorkThunk = (task, state) =>
         {
             var item = (WorkItem)state;
             item.SynchronizationContext.ExecuteBackground(item);

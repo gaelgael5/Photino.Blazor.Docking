@@ -37,7 +37,7 @@ namespace Photino.Blazor
                     return new BlazorWindowRootComponents(manager, store);
                 })
                 .AddSingleton<Dispatcher, PhotinoDispatcher>()
-                .AddSingleton<IFileProvider>(_ =>
+                .AddSingleton(_ =>
                 {
                     if (fileProvider is null)
                     {

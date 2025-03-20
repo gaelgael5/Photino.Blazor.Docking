@@ -63,7 +63,7 @@ namespace Photino.Blazor
         {
             // It would be better if we were told whether or not this is a navigation request, but
             // since we're not, guess.
-            var localPath = (new Uri(url)).LocalPath;
+            var localPath = new Uri(url).LocalPath;
             var hasFileExtension = localPath.LastIndexOf('.') > localPath.LastIndexOf('/');
 
             //Remove parameters before attempting to retrieve the file. For example: http://localhost/_content/Blazorise/button.js?v=1.0.7.0

@@ -1,7 +1,10 @@
-﻿using Microsoft.AspNetCore.Components;
+﻿using Bb.ComponentModel;
+using Bb.ComponentModel.Attributes;
+using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.DependencyInjection;
 using Photino.Blazor.CustomWindow.Services;
 using Photino.Blazor.Docking.Services;
+using Photino.Blazor;
 using System.Drawing;
 
 namespace Photino.Blazor.Docking.Extensions;
@@ -36,7 +39,7 @@ public static class ServiceCollectionExtensions
     /// <param name="defaultFloatPanelSize">
     /// Default floating window size in screen pixels. For <c>null</c> is <see cref="Size"/>(400, 600).
     /// </param>
-    public static IServiceCollection AddPhotinoBlazorDocking(this IServiceCollection services)
+    public static IServiceCollection AddBlazorDocking(this IServiceCollection services)
     {
 
         services.AddSingleton<ScreensAgentService>();
@@ -49,4 +52,16 @@ public static class ServiceCollectionExtensions
         return services;
 
     }
+
+
+    //[ExposeClass(ConstantsCore.Service, ExposedType = typeof(IInjectBuilder<IServiceCollection>), LifeCycle = IocScopeEnum.Transiant)]
+    //public class ServiceCollectionBuilder : InjectBuilder<IServiceCollection>
+    //{
+    //    public override object Execute(IServiceCollection services)
+    //    {
+    //        services.AddBlazorDocking();
+    //        return null;
+    //    }
+    //}
+
 }
